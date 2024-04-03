@@ -1,0 +1,19 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "a basic fullstack web application",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": [
+    "node",
+    "server"
+  ],
+  "author": "Abdul Haseeb",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}
