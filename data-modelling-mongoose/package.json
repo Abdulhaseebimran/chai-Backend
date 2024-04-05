@@ -1,0 +1,19 @@
+{
+  "name": "data-modelling-mongoose",
+  "version": "1.0.0",
+  "description": "data modelling mongoose",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "keywords": [
+    "node",
+    "mongoose"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.19.2",
+    "mongoose": "^8.3.0"
+  }
+}
