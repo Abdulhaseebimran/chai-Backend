@@ -2,19 +2,14 @@
 
 Welcome to my repository for learning backend development using Mongoose and Express!
 
----
-
 ## Introduction
 This repository is dedicated to exploring the world of backend development using Mongoose and Express, two powerful tools in the Node.js ecosystem. Here, you'll find resources, code snippets, and tutorials to help you master the art of building robust and scalable backend systems.
-
----
 
 ## Technologies Used
 - Node.js
 - Express.js
 - Mongoose
 
----
 
 ## Getting Started
 To get started with this project, follow these steps:
@@ -29,8 +24,6 @@ To get started with this project, follow these steps:
 - [Mongoose Documentation](https://mongoosejs.com/docs/)
 - [Node.js Documentation](https://nodejs.org/en/docs/)
 - [YouTube Tutorial Playlist](https://www.youtube.com/playlist?list=PLu71SKxNbfoBGh_8p_NS-ZAh6v7HhYqHW)
-
---- 
 
 ## How to Contribute
 If you'd like to contribute to this project, feel free to fork this repository and submit a pull request with your changes. Contributions, suggestions, and feedback are always welcome!
