@@ -12,5 +12,13 @@ app.use(express.json({limit: "16KB"})); // limit the size of the request body to
 app.use(express.urlencoded({ extended: true })); // parse the URL-encoded data with the querystring library
 app.use(cookieParser());
 
+// import routes
+
+import userRouter from "./routes/user.routes.js";
+
+// routes declearation
+
+app.use("/api/v1/users", userRouter); // middleware for the user routes
+
 
 export { app }
