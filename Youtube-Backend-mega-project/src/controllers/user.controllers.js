@@ -1,4 +1,3 @@
-import e from "express";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { User } from "../models/user.models.js";
@@ -16,11 +15,12 @@ const registerUser = asyncHandler(async (req, res) => {
   // check for user creation
   // return the response
 
-  const { firstName, username, email, password } = req.body;
-  console.log(firstName, username, email, password); // check the data is coming or not
+  const { fullname, username, email, password } = req.body;
+  // console.log(req.body); // check the data is coming or not
+  // console.log(fullname, username, email, password); // check the data is coming or not
 
   if (
-    [firstName, username, email, password].some((field) => field.trim() === "")
+    [fullname, username, email, password].some((field) => field?.trim() === "")
   ) {
     throw new ApiError(400, "All field is required");
   } else if (email.includes("@") === false) {
@@ -28,7 +28,7 @@ const registerUser = asyncHandler(async (req, res) => {
   }
 
   // check if user already exists - email, username
-  const existedUser = User.findOne({
+  const existedUser = await User.findOne({
     $or: [{ username }, { email }],
   });
 
@@ -41,7 +41,13 @@ const registerUser = asyncHandler(async (req, res) => {
 
   // check for image, check for avatar
   const avatarLocalPath = req.files?.avatar[0]?.path;
-  const coverImageLocalPath = req.files?.coverImage[0]?.path;
+  // const coverImageLocalPath = req.files?.coverImage[0]?.path;
+  // console.log("req files", req.files);
+
+  let coverImageLocalPath;
+  if(req.files && Array.isArray(req.files.coverImage) && req.files.coverImage.length > 0){
+    coverImageLocalPath = req.files.coverImage[0].path;
+  }
 
   if (!avatarLocalPath) {
     throw new ApiError(400, "Avatar image is required");
@@ -59,7 +65,7 @@ const registerUser = asyncHandler(async (req, res) => {
   // create a user object - crate entry to db
 
   const user = await User.create({
-    firstName,
+    fullname,
     avatar: avatar.url,
     coverImage: coverImage?.url || "", // not optional in db schema
     username: username.toLowerCase(),

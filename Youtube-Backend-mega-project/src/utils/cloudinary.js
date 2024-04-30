@@ -15,13 +15,14 @@ const uploadFileCloudinary = async (localFilePath) => {
       resource_type: "auto",
     });
     // file is successfully uploaded on cloudinary
-    console.log(
-      "file is successfully uploaded on cloudinary",
-      cloudinaryResponse.url
-    );
+    // console.log(
+    //   "file is successfully uploaded on cloudinary",
+    //   cloudinaryResponse.url
+    // );
+    fs.unlinkSync(localFilePath); // remove the locally saved temporary file
     return cloudinaryResponse;
   } catch (error) {
-    fs.unlinkSync(localFilePath); // remove the locally saved temporary file as the uploaded operation got failed
+    // fs.unlinkSync(localFilePath); // remove the locally saved temporary file as the uploaded operation got failed
     return null;
   }
 };
