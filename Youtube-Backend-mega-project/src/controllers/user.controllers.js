@@ -259,30 +259,134 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 // change the current password controller
 
 const changeCurrentPassword = asyncHandler(async (req, res) => {
-    const {oldPassword, newPassword, confPassword} = req.body;
+  const { oldPassword, newPassword, confPassword } = req.body;
 
-    // if newpassword is equal confpassword then go to next step else throw an error message
-    // if(!(newPassword === confPassword)){
-    //     throw new ApiError(400, "Password does not match");
-    // }
-    const user = await User.findById(req.user._id);
-    const isPasswordCorrect = await user.isPasswordCorrect(oldPassword);
+  // if newpassword is equal confpassword then go to next step else throw an error message
+  // if(!(newPassword === confPassword)){
+  //     throw new ApiError(400, "Password does not match");
+  // }
+  const user = await User.findById(req.user._id);
+  const isPasswordCorrect = await user.isPasswordCorrect(oldPassword);
 
-    if(!isPasswordCorrect){
-        throw new ApiError(401, "Invalid password");
-    }
+  if (!isPasswordCorrect) {
+    throw new ApiError(401, "Invalid password");
+  }
 
-    user.password = newPassword;
-    await user.save({validityBeforeSave: false});
+  user.password = newPassword;
+  await user.save({ validityBeforeSave: false });
 
-    return res
+  return res
     .status(200)
     .json(new ApiResponse(200, {}, "Password changed successfully"));
 });
 
-const getCurrentUser = asyncHandler(async (req, res) => { 
-    return res
-    .status(200)
-    .json(new ApiResponse(200, {}, "User details"));
+// get the current user details
+const getCurrentUser = asyncHandler(async (req, res) => {
+  return res.status(200).json(new ApiResponse(200, {}, "User details"));
 });
-export { registerUser, loginUser, logoutUser, refreshAccessToken, changeCurrentPassword, getCurrentUser };
+
+// update the user details
+
+const updateAccountDetail = asyncHandler(async (req, res) => {
+  const { fullname, email } = req.body;
+
+  if (!fullname || !email) {
+    throw new ApiError(400, "All fields are required");
+  }
+
+  const user = await User.findByIdAndUpdate(
+    req.user._id,
+    {
+      $set: {
+        fullname,
+        email,
+      },
+    },
+    {
+      new: true,
+    }
+  ).select("-password");
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(200, user, "User Account details updated successfully")
+    );
+});
+
+// update the user avatar
+
+const updateAvatar = asyncHandler(async (req, res) => {
+  const avatarLocalPath = req.file?.path;
+  if (!avatarLocalPath) {
+    throw new ApiError(400, "Avatar image is required");
+  }
+
+  const avatar = await uploadFileCloudinary(avatarLocalPath);
+  if (!avatar) {
+    throw new ApiError(400, "Avatar image upload failed");
+  }
+
+  // update the avatar in db
+  const user = await User.findByIdAndUpdate(
+    req.user?._id,
+    {
+      $set: {
+        avatar: avatar.url,
+      },
+    },
+    {
+      new: true,
+    },
+    "User avatar updated successfully"
+  ).select("-password");
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(200, user, "User avatar updated successfully")
+    );
+});
+
+// update the user cover image
+const updateCoverImage = asyncHandler(async (req, res) => {
+  const coverImageLocalPath = req.file?.path;
+  if (!coverImageLocalPath) {
+    throw new ApiError(400, "Cover image is required");
+  }
+
+  const coverImage = await uploadFileCloudinary(coverImageLocalPath);
+  if (!coverImage) {
+    throw new ApiError(400, "Cover image upload failed");
+  }
+
+  // update the cover image in db
+  const user = await User.findByIdAndUpdate(
+    req.user?._id,
+    {
+      $set: {
+        coverImage: coverImage.url,
+      },
+    },
+    {
+      new: true,
+    }
+  ).select("-password");
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(200, user, "User cover image updated successfully")
+    );
+});
+export {
+  registerUser,
+  loginUser,
+  logoutUser,
+  refreshAccessToken,
+  changeCurrentPassword,
+  getCurrentUser,
+  updateAccountDetail,
+  updateAvatar,
+  updateCoverImage,
+};
