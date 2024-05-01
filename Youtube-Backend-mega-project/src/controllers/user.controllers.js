@@ -256,4 +256,33 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
   }
 });
 
-export { registerUser, loginUser, logoutUser, refreshAccessToken };
+// change the current password controller
+
+const changeCurrentPassword = asyncHandler(async (req, res) => {
+    const {oldPassword, newPassword, confPassword} = req.body;
+
+    // if newpassword is equal confpassword then go to next step else throw an error message
+    // if(!(newPassword === confPassword)){
+    //     throw new ApiError(400, "Password does not match");
+    // }
+    const user = await User.findById(req.user._id);
+    const isPasswordCorrect = await user.isPasswordCorrect(oldPassword);
+
+    if(!isPasswordCorrect){
+        throw new ApiError(401, "Invalid password");
+    }
+
+    user.password = newPassword;
+    await user.save({validityBeforeSave: false});
+
+    return res
+    .status(200)
+    .json(new ApiResponse(200, {}, "Password changed successfully"));
+});
+
+const getCurrentUser = asyncHandler(async (req, res) => { 
+    return res
+    .status(200)
+    .json(new ApiResponse(200, {}, "User details"));
+});
+export { registerUser, loginUser, logoutUser, refreshAccessToken, changeCurrentPassword, getCurrentUser };
