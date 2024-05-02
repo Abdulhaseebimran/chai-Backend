@@ -1,7 +1,10 @@
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { User } from "../models/user.models.js";
-import { uploadFileCloudinary } from "../utils/cloudinary.js";
+import {
+  uploadFileCloudinary,
+  deleteFileCloudinary,
+} from "../utils/cloudinary.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import mongoose from "mongoose";
 import jwt from "jsonwebtoken";
@@ -332,7 +335,10 @@ const updateAvatar = asyncHandler(async (req, res) => {
     req.user?._id,
     {
       $set: {
-        avatar: avatar.url,
+        avatar: {
+          url: avatar.url,
+          public_id: avatar.public_id,
+        },
       },
     },
     {
@@ -342,6 +348,10 @@ const updateAvatar = asyncHandler(async (req, res) => {
   ).select("-password");
 
   // TODO: remove the avatar from cloudinary
+  const deleteAvatar = user.avatar?.public_id;
+  if (deleteAvatar && user.avatar.public_id) {
+    await deleteFileCloudinary(deleteAvatar);
+  }
 
   return res
     .status(200)
