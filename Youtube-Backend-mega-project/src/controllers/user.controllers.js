@@ -185,8 +185,8 @@ const logoutUser = asyncHandler(async (req, res) => {
   await User.findByIdAndUpdate(
     req.user._id,
     {
-      $set: {
-        refreshToken: undefined,
+      $unset: {
+        refreshToken: 1, //
       },
     },
     {
@@ -218,11 +218,11 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
     // verify tokens
     const decodedToken = jwt.verify(
       inCompleteRefreshToken,
-      process.env.REFRESH_TOKEN_SECRET
+      process.env.REFRESH_TOEKN_SECRET
     );
 
     // find the user
-    const user = User.findById(decodedToken._id);
+    const user = User.findById(decodedToken?._id);
     if (!user) {
       throw new ApiError(404, "Invalid Refresh Token");
     }
@@ -337,7 +337,7 @@ const updateAvatar = asyncHandler(async (req, res) => {
       $set: {
         avatar: {
           url: avatar.url,
-          public_id: avatar.public_id,
+          public_id: avatar._id,
         },
       },
     },
@@ -348,8 +348,8 @@ const updateAvatar = asyncHandler(async (req, res) => {
   ).select("-password");
 
   // TODO: remove the avatar from cloudinary
-  const deleteAvatar = user.avatar?.public_id;
-  if (deleteAvatar && user.avatar.public_id) {
+  const deleteAvatar = user.avatar?._id;
+  if (deleteAvatar && user.avatar._id) {
     await deleteFileCloudinary(deleteAvatar);
   }
 
@@ -390,7 +390,8 @@ const updateCoverImage = asyncHandler(async (req, res) => {
 
 // create user channel profile
 const getUserChannelProfile = asyncHandler(async (req, res) => {
-  const { username } = req.params; // get the username from the params
+  const { username } = req.params; // get the username from the params means from the url
+
   if (!username?.trim()) {
     throw new ApiError(400, "username is missing");
   }
@@ -406,7 +407,7 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
         from: "subscriptions",
         localField: "_id",
         foreignField: "channel",
-        as: "subscirbers",
+        as: "subscribers",
       },
     },
     {
@@ -422,7 +423,7 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
         subscribersCount: {
           $size: "$subscribers",
         },
-        channelSubscribedCountTo: {
+        channelsSubscribedToCount: {
           $size: "$subscribedTo",
         },
         isSubscribed: {
@@ -436,10 +437,10 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
     },
     {
       $project: {
-        fullname: 1,
+        fullName: 1,
         username: 1,
         subscribersCount: 1,
-        channelSubscribedCountTo: 1,
+        channelsSubscribedToCount: 1,
         isSubscribed: 1,
         avatar: 1,
         coverImage: 1,
@@ -447,19 +448,15 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
       },
     },
   ]);
-  // console.log("channel", channel);
+
   if (!channel?.length) {
-    throw new ApiError(404, "Channel not found");
+    throw new ApiError(404, "channel does not exists");
   }
 
   return res
     .status(200)
     .json(
-      new ApiResponse(
-        200,
-        channel[0],
-        "User Channel profile fetched successfully"
-      )
+      new ApiResponse(200, channel[0], "User channel fetched successfully")
     );
 });
 
@@ -477,17 +474,17 @@ const getUserHistory = asyncHandler(async (req, res) => {
         localField: "watchHistory",
         foreignField: "_id",
         as: "watchHistory",
-        $pipeline: [
+        pipeline: [
           {
             $lookup: {
               from: "users",
               localField: "owner",
               foreignField: "_id",
               as: "owner",
-              $pipeline: [
+              pipeline: [
                 {
-                  $lookup: {
-                    fullname: 1,
+                  $project: {
+                    fullName: 1,
                     username: 1,
                     avatar: 1,
                   },
@@ -506,13 +503,14 @@ const getUserHistory = asyncHandler(async (req, res) => {
       },
     },
   ]);
+
   return res
     .status(200)
     .json(
       new ApiResponse(
         200,
         user[0].watchHistory,
-        "watch History fetched successfully"
+        "Watch history fetched successfully"
       )
     );
 });
